@@ -42,7 +42,7 @@ module.exports.postSignUp = (req, res, next) => {
                 phone: phone,
                 dateCreate: Date.now()
             });
-            newUser.save(function(err) {
+            return newUser.save(function(err) {
                 if (err) {
                     return res.status(404).json({message: ['Them user error']});
                 }
@@ -80,7 +80,3 @@ module.exports.postSignIn = (req, res, next) => {
         
     }); 
 }
-
-// module.exports.getSignIn = (req, res, next) => {
-//     console.log(req.headers)
-// }

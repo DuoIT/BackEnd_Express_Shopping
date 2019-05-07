@@ -1,50 +1,28 @@
 var Categories = require('../models/category.model');
 var Products = require('../models/product.model');
 var Cart = require('../models/cart.model')
+var Contact = require('../models/contact.model')
 ObjectId = require('mongodb').ObjectID;
 
 module.exports.getHome = (req, res, next) => {
     Products.find()
-    .select('name img cate des price quantity')
-    .exec()
-    .then(product =>{
+    .then(product => {
         Categories.find()
         .then(cate => {
-            const cates = cate.map(doc =>{
-                        return {
-                            id: doc._id,
-                            name: doc.name,
-                            request: {
-                                type: 'GET',
-                                url:'http://localhost:3000'
-                            }
-                        }});
-            const products = product.map(doc => {
-                return {
-                    id: doc._id,
-                    name: doc.name,
-                    img: doc.img,
-                    cate: doc.cate,
-                    des: doc.des,
-                    price: doc.price,
-                    quantity: doc.quantity,
-                    request: {
-                        type: 'GET',
-                        url:'http://localhost:3000'
-                    }
-                }
-            });
-
             return res.status(200).json({
-                cates: cates,
-                products: products
+                products: product,
+                cates: cate
             });
         })
-        
+        .catch(err => {
+            return res.status(500).json({
+                error: err
+            });
+        })       
     })
     .catch(err => {
             console.log(err);
-            res.status(500).json({
+            return res.status(500).json({
                 error: err
             });
     });
@@ -56,18 +34,21 @@ module.exports.detail = (req, res, netx) => {
     // 5cb76acc3212d60fb87d6d71
     Products.findById(id)
     .then(data => {
-        res.status(200).json({product: data})
+        return res.status(200).json({product: data})
     })
     .catch(err => {
-        res.status(404).json({err: err});
+        return res.status(404).json({err: err});
     })
 };
 
 module.exports.postAddToCart = (req, res, next) => {
     var productId = req.params.id;
     var userId = req.body.userId;
-    var total = req.body.total;
-    // Cart.findOneAndUpdate({'userId': userId, 'productId': productId },{'total': total }, {new: true}, (err, doc) => {
+    var qty = req.body.qty;
+    console.log(productId);
+    console.log(userId);
+    console.log(qty);
+    // Cart.findOneAndUpdate({'userId': userId, 'productId': productId },{'qty': qty }, {new: true}, (err, doc) => {
     //     if (err) {
     //         console.log("Something wrong when updating data!");
     //         return res.json({message : err});
@@ -78,15 +59,15 @@ module.exports.postAddToCart = (req, res, next) => {
     Cart.findOne({'userId': userId, 'productId' : productId }, (err,cart) => {
         if(err) return res.status(404).json({ message : 'Cart error'});
         if(cart) {
-            const oldTotal = parseInt(cart.total);
-            const newTotal = oldTotal + total;
-            Cart.findOneAndUpdate({'userId': userId, 'productId': productId }, {'total': newTotal} , {upsert:true}, function(err, doc){
+            const oldqty = parseInt(cart.qty);
+            const newqty = oldqty + qty;
+            Cart.findOneAndUpdate({'userId': userId, 'productId': productId }, {'qty': newqty} , {upsert:true}, function(err, doc){
                 if (err) return res.status(404).json({ error: err });
                 return res.status(200).json({message: doc});
             });
         } else {
             Products.findById(productId, (err, doc) => {
-                if(err) res.status(404).send({err : err});
+                if(err) res.status(404).json({err : err});
                 var newCart = new Cart({
                     userId : userId,
                     productId : productId,
@@ -95,9 +76,9 @@ module.exports.postAddToCart = (req, res, next) => {
                     cate: doc.cate,
                     des : doc.des,
                     price : doc.price,                    
-                    total : total
+                    qty : qty
                 });
-                newCart.save(function(err) {
+                return newCart.save(function(err) {
                     if (err) {
                         return res.status(404).json({message: ['Add to cart loi']});
                     }
@@ -114,23 +95,90 @@ module.exports.postCart = (req, res, next) => {
     const userId = req.body.userId;
     Cart.find({'userId': userId}, (err, cart) => {
         if(err) return res.status(404).json({err: err});
-        res.status(200).send({
+        return res.status(200).json({
             cart : cart
         })
     })
 }
 
-module.exports.postProductId = (req, res, next) => {
-    var productId = req.params.id;
-    Products.findById(productId)
-    .then(product => {
-        return res.status(200).send({
-            product : product
-        })
+module.exports.removeProductId = (req, res, next) => {
+    var cartId = req.params.id;
+    Cart.findOneAndDelete({_id : cartId}, err => {
+        if(err) {
+            console.log(err);
+            return res.status(404).json({err: err});
+        }
+        return res.status(200).json({message : 'ok'});
     })
-    .catch(err => {
-        return res.send(404).send({
-            err : err
+}
+
+module.exports.contact = (req, res, next) => {
+    req.checkBody('name', ' Invalid Username').notEmpty().isLength({max: 50});
+    req.checkBody('email', ' Invalid Email').notEmpty().isEmail();
+    req.checkBody('subject', ' Invalid Subject').notEmpty().isLength({max: 500});
+    req.checkBody('message', ' Invalid Message').notEmpty().isLength({max: 5000});
+    var errors = req.validationErrors();
+    if(errors) {   
+        var messages = [];       
+        errors.forEach(function(error) {
+            messages.push(error.msg);
+        });
+        return res.status(404).json({"err": messages});
+    }
+    var contact = new Contact({
+        name : req.body.name,
+        email : req.body.email,
+        subject : req.body.subject,
+        message : req.body.message,
+        time : Date.now()
+    })    
+    return contact.save(function (err) {
+        if (err) return res.status(404).json({err: err});
+        return res.status(200).json({mess: 'success'})        
+    });        
+}
+
+module.exports.getCate = (req, res, next) => {
+    const cateId = req.params.id;
+    Categories.findById(cateId, (err, doc) => {
+        if(err) {
+            return res.status(404).json({
+                err : err
+            })
+        }
+        return Products.find({'cate': doc.name}, (err, doc) => {
+            if(err) {
+                return res.status(404).json({err : err});
+            }
+            return res.status(200).json({
+                products : doc
+            })
         })
     })
 }
+
+module.exports.changeQty = (req, res, next) => {
+    const productId = req.params.id;
+    const userId = req.body.userId;
+    const qty = req.body.qty;
+
+    Cart.findOneAndUpdate({'userId' : userId, 'productId' : productId }, {'qty' : qty}, {new: true} ,(err, doc) => {
+        if(err) {
+            console.log(err);
+            return res.status(500).send({
+                err: err
+            })
+        }
+        return res.status(200).send({
+            message : doc
+        })
+    })
+}
+// Cart.findOneAndUpdate({'userId': userId, 'productId': productId },{'qty': qty }, {new: true}, (err, doc) => {
+//     if (err) {
+//         console.log("Something wrong when updating data!");
+//         return res.json({message : err});
+//     }
+//     console.log(doc);
+//     return res.json({message: doc});
+// });

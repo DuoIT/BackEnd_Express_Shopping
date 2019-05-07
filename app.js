@@ -19,25 +19,13 @@ app.use(cors());
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb+srv://phuochoaile:lephuochoai@cluster0-m3edx.mongodb.net/shopHD', {useNewUrlParser: true});
 
-// app.use(function(req, res, next) {
-//   if (req.headers && req.headers.authorization && req.headers.authorization.split(' ')[0] === 'JWT') {
-//     jsonwebtoken.verify(req.headers.authorization.split(' ')[1], 'keyBaoMat', function(err, decode) {
-//       if (err) req.user = undefined;
-//       req.user = decode;
-//       next();
-//     });
-//   } else {
-//     req.user = undefined;
-//     next();
-//   }
-// });
 
-app.use(function(req, res, next) {  
-  res.header("Access-Control-Allow-Headers","http://localhost:3001");
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  next();
-});
+// app.use(function(req, res, next) {  
+//   res.header("Access-Control-Allow-Headers","http://localhost:3001");
+//   res.header('Access-Control-Allow-Credentials', true);
+//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+//   next();
+// });
 
 
 // view engine setup
