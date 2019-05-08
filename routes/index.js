@@ -21,4 +21,6 @@ router.post('/contact', controller.contact);
 
 router.get('/cates/:id', controller.getCate);
 
+router.get('/search', controller.search)
+
 module.exports = router;

@@ -174,11 +174,27 @@ module.exports.changeQty = (req, res, next) => {
         })
     })
 }
-// Cart.findOneAndUpdate({'userId': userId, 'productId': productId },{'qty': qty }, {new: true}, (err, doc) => {
-//     if (err) {
-//         console.log("Something wrong when updating data!");
-//         return res.json({message : err});
-//     }
-//     console.log(doc);
-//     return res.json({message: doc});
-// });
+
+module.exports.search = (req, res, next) => {
+    var q = req.query.q;
+    console.log(q)
+    
+    const regex = new RegExp(escapeRegex(q), 'gi');
+
+    Products.find({name : regex},(err, doc) => {
+        if(err) {
+            return res.status(500).json({err : err});
+        }
+        return res.status(200).json({products : doc});
+    })
+    // var matchedUsers = users.filter(function(user){
+    //     return user.name.indexOf(q) !== -1;
+    // });
+    // res.render('users/index', {
+    //     users: matchedUsers
+    // });
+}
+
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
