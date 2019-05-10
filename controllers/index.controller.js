@@ -5,7 +5,7 @@ var Contact = require('../models/contact.model')
 ObjectId = require('mongodb').ObjectID;
 
 module.exports.getHome = (req, res, next) => {
-    Products.find()
+    return Products.find()
     .then(product => {
         Categories.find()
         .then(cate => {
@@ -45,17 +45,7 @@ module.exports.postAddToCart = (req, res, next) => {
     var productId = req.params.id;
     var userId = req.body.userId;
     var qty = req.body.qty;
-    console.log(productId);
-    console.log(userId);
-    console.log(qty);
-    // Cart.findOneAndUpdate({'userId': userId, 'productId': productId },{'qty': qty }, {new: true}, (err, doc) => {
-    //     if (err) {
-    //         console.log("Something wrong when updating data!");
-    //         return res.json({message : err});
-    //     }
-    //     console.log(doc);
-    //     return res.json({message: doc});
-    // });
+        
     Cart.findOne({'userId': userId, 'productId' : productId }, (err,cart) => {
         if(err) return res.status(404).json({ message : 'Cart error'});
         if(cart) {
@@ -140,13 +130,14 @@ module.exports.contact = (req, res, next) => {
 
 module.exports.getCate = (req, res, next) => {
     const cateId = req.params.id;
-    Categories.findById(cateId, (err, doc) => {
-        if(err) {
-            return res.status(404).json({
-                err : err
-            })
-        }
-        return Products.find({'cate': doc.name}, (err, doc) => {
+    // return Categories.findById(cateId, (err, doc) => {
+    //     if(err) {
+    //         return res.status(404).json({
+    //             err : err
+    //         })
+    //     }
+    // {'cate': doc.name}
+        return Products.find({}, (err, doc) => {
             if(err) {
                 return res.status(404).json({err : err});
             }
@@ -154,7 +145,7 @@ module.exports.getCate = (req, res, next) => {
                 products : doc
             })
         })
-    })
+    // })
 }
 
 module.exports.changeQty = (req, res, next) => {

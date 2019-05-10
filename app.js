@@ -11,6 +11,9 @@ var expressValidator = require('express-validator');
 var jwt = require('jsonwebtoken');
 
 
+var indexAdmin = require('./routes/admin/index');
+
+
 var app = express();
 app.use(expressValidator());
  
@@ -37,9 +40,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static('uploads'))
 
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
+app.use('/admin', indexAdmin);
 
 
 // catch 404 and forward to error handler
