@@ -130,14 +130,14 @@ module.exports.contact = (req, res, next) => {
 
 module.exports.getCate = (req, res, next) => {
     const cateId = req.params.id;
-    // return Categories.findById(cateId, (err, doc) => {
-    //     if(err) {
-    //         return res.status(404).json({
-    //             err : err
-    //         })
-    //     }
-    // {'cate': doc.name}
-        return Products.find({}, (err, doc) => {
+    return Categories.findById(cateId, (err, doc) => {
+        if(err) {
+            return res.status(404).json({
+                err : err
+            })
+        }
+    
+        return Products.find({'cate': doc.name}, (err, doc) => {
             if(err) {
                 return res.status(404).json({err : err});
             }
@@ -145,7 +145,7 @@ module.exports.getCate = (req, res, next) => {
                 products : doc
             })
         })
-    // })
+    })
 }
 
 module.exports.changeQty = (req, res, next) => {
