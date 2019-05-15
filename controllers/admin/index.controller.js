@@ -3,6 +3,7 @@ const Products = require('../../models/product.model');
 
 
 module.exports.postProduct = (req, res, next) => {
+    console.log(req.file);
     const name = req.body.name;
     const price = req.body.price;
     const cate = req.body.cate;
@@ -13,9 +14,10 @@ module.exports.postProduct = (req, res, next) => {
     const newProduct = new Products({
         name: name, price: price, cate: cate, des: des, quantity: quantity, img: img
     })
+    console.log(newProduct);
     return newProduct.save()
     .then(result => {
-        console.log(result);
+        // console.log(result);
         return res.status(200).json({
             Product : newProduct
         })
