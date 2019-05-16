@@ -8,12 +8,23 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/');
     },
     filename: function(req, file, cb) {
-        cb(null, new Date().toISOString() + file.originalname);
+        // cb(null, new Date().toISOString() + file.originalname);
+        cb(null, Date.now().toString() + file.originalname);
     }
 });
 
-const upload = multer({storage: storage });
+const fileFilter = (req, file, cb) => {
+    // reject a file
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+};
 
-router.post('/products', upload.single('img'), controller.postProduct );
+const upload = multer({storage: storage, fileFilter: fileFilter });
+
+router.post('/product', upload.single('img'), controller.postProduct );
+router.post('/category', controller.postCategory)
 
 module.exports = router;

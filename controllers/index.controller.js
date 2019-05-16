@@ -83,7 +83,7 @@ module.exports.postAddToCart = (req, res, next) => {
 
 module.exports.postCart = (req, res, next) => {
     const userId = req.body.userId;
-    Cart.find({'userId': userId}, (err, cart) => {
+    return Cart.find({'userId': userId}, (err, cart) => {
         if(err) return res.status(404).json({err: err});
         return res.status(200).json({
             cart : cart
@@ -92,13 +92,18 @@ module.exports.postCart = (req, res, next) => {
 }
 
 module.exports.removeProductId = (req, res, next) => {
-    var cartId = req.params.id;
-    Cart.findOneAndDelete({_id : cartId}, err => {
-        if(err) {
+    var cartId = req.body.id;
+    console.log(cartId);
+
+    Cart.findByIdAndDelete({_id : cartId}, (err, todo) => {
+        if(!err) {
+            console.log('delete');
+            return res.status(200).json({message : todo._id});            
+        } else {
             console.log(err);
             return res.status(404).json({err: err});
         }
-        return res.status(200).json({message : 'ok'});
+        
     })
 }
 
@@ -149,20 +154,17 @@ module.exports.getCate = (req, res, next) => {
 }
 
 module.exports.changeQty = (req, res, next) => {
-    const productId = req.params.id;
-    const userId = req.body.userId;
     const qty = req.body.qty;
-
-    Cart.findOneAndUpdate({'userId' : userId, 'productId' : productId }, {'qty' : qty}, {new: true} ,(err, doc) => {
+    const cartId = req.params.id;
+    Cart.findByIdAndUpdate(cartId, {'qty' : qty}, {new: true} ,(err, doc) => {
         if(err) {
             console.log(err);
-            return res.status(500).send({
+            return res.status(500).json({
                 err: err
             })
         }
-        return res.status(200).send({
-            message : doc
-        })
+        console.log('update');
+        return res.status(200);
     })
 }
 

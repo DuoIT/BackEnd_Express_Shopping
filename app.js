@@ -21,15 +21,7 @@ app.use(cors());
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb+srv://phuochoaile:lephuochoai@cluster0-m3edx.mongodb.net/shopHD', {useNewUrlParser: true});
-
-
-// app.use(function(req, res, next) {  
-//   res.header("Access-Control-Allow-Headers","http://localhost:3001");
-//   res.header('Access-Control-Allow-Credentials', true);
-//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-//   next();
-// });
-
+mongoose.set('useFindAndModify', false);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -40,7 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static('uploads'))
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
