@@ -15,7 +15,8 @@ router.post('/add-to-cart/:id', controller.postAddToCart);
 router.post('/cart', controller.postCart)
 router.post('/cart/product/:id', controller.changeQty)
 
-router.post('/cart/remove/product/', controller.removeProductId);
+router.delete('/cart/remove/product/:id', controller.removeProductId);
+router.delete('/cart/remove/all/:id', controller.removeAll )
 
 router.post('/contact', controller.contact);
 

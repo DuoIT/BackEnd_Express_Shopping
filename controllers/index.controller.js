@@ -92,7 +92,7 @@ module.exports.postCart = (req, res, next) => {
 }
 
 module.exports.removeProductId = (req, res, next) => {
-    var cartId = req.body.id;
+    var cartId = req.params.id;
     console.log(cartId);
 
     Cart.findByIdAndDelete({_id : cartId}, (err, todo) => {
@@ -186,6 +186,17 @@ module.exports.search = (req, res, next) => {
     // res.render('users/index', {
     //     users: matchedUsers
     // });
+}
+
+module.exports.removeAll = (req, res, next) => {
+    const id = req.params.id;
+    Cart.deleteMany({userId: id}, (err, doc) => {
+        if(err) {
+            return res.status(500).json({err: err});
+        }
+        console.log('delete all');
+        return res.status(200).json({message: doc});
+    })
 }
 
 function escapeRegex(text) {
