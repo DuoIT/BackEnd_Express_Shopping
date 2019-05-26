@@ -1,8 +1,9 @@
 var Categories = require('../models/category.model');
 var Products = require('../models/product.model');
-var Cart = require('../models/cart.model')
-var Contact = require('../models/contact.model')
-ObjectId = require('mongodb').ObjectID;
+var Cart = require('../models/cart.model');
+var Contact = require('../models/contact.model');
+var DisCountCode = require('../models/disCountCode.model');
+var CheckOut = require('../models/checkout.model');
 
 module.exports.getHome = (req, res, next) => {
     return Products.find()
@@ -164,7 +165,7 @@ module.exports.changeQty = (req, res, next) => {
             })
         }
         console.log('update');
-        return res.status(200);
+        return res.status(200).json({message: 'update success'});
     })
 }
 
@@ -180,12 +181,6 @@ module.exports.search = (req, res, next) => {
         }
         return res.status(200).json({products : doc});
     })
-    // var matchedUsers = users.filter(function(user){
-    //     return user.name.indexOf(q) !== -1;
-    // });
-    // res.render('users/index', {
-    //     users: matchedUsers
-    // });
 }
 
 module.exports.removeAll = (req, res, next) => {
@@ -199,6 +194,63 @@ module.exports.removeAll = (req, res, next) => {
     })
 }
 
+module.exports.disCountCode = (req, res, next) => {
+    const disCountCode = req.body.disCountCode;
+    console.log(disCountCode);
+    DisCountCode.findOne({'code' : disCountCode}, (err, doc) => {
+        if(err) {
+            return res.status(500).json({err:  err});
+        }
+        if(!doc) {
+            return res.status(500).json({err:  'Ma khong ton tai'});   
+        } else {
+            console.log('Giam: '+doc.reduced);
+            console.log('Stat Date: '+doc.startDate);
+            console.log('End Date: '+doc.endDate);
+            const now = Date.now();
+
+            if(now < doc.startDate) {
+                return res.status(500).json({err:  'Ma chua toi han su dung'});
+            } else if(now > doc.endDate) {
+                return res.status(500).json({err:  'Ma da het han su dung'});
+            } else if(doc.numberOfUses <= 0) {
+                return res.status(500).json({err:  'Ma da het luot su dung'});
+            }
+
+            return res.status(200).json({doc : doc});                     
+        }       
+    })
+    
+}
+
+module.exports.checkOut = (req, res, next) => {
+    // console.log(req.body);
+    var checkout = new CheckOut(req.body);
+    checkout.save(err => {
+        if (err) {
+            console.log(err)
+            return res.status(404).json({message: err});
+        }
+        else {
+            return res.status(200).json({message: checkout})
+        }
+    })    
+}
+
 function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
+
+module.exports.searchCate = (req, res, next) => {
+    var q = req.query.q;
+    console.log(q)
+    
+    const regex = new RegExp(escapeRegex(q), 'gi');
+
+    Categories.find({name : regex},(err, doc) => {
+        if(err) {
+            return res.status(500).json({err : err});
+        }
+        return res.status(200).json({cates : doc});
+    })
+}
