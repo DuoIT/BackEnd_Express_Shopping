@@ -96,7 +96,7 @@ module.exports.removeProductId = (req, res, next) => {
     var cartId = req.params.id;
     console.log(cartId);
 
-    Cart.findByIdAndDelete({_id : cartId}, (err, todo) => {
+    Cart.findByIdAndDelete(cartId, (err, todo) => {
         if(!err) {
             console.log('delete');
             return res.status(200).json({message : todo._id});            

@@ -29,4 +29,8 @@ router.post('/category', controller.postCategory);
 router.delete('/delete/product/:id', controller.removeProduct);
 router.delete('/delete/cate/:id', controller.removeCate);
 
+router.get('/contact', controller.getContact);
+router.delete('/contact/:id', controller.deleteContact);
+router.get('/search/contact', controller.searchContact)
+
 module.exports = router;

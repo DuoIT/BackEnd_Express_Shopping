@@ -1,5 +1,6 @@
 const Product = require('../../models/product.model');
 const Category = require('../../models/category.model')
+const Contact = require('../../models/contact.model')
 
 
 module.exports.postProduct = (req, res, next) => {
@@ -10,8 +11,9 @@ module.exports.postProduct = (req, res, next) => {
     const quantity = req.body.quantity;
     const productId = req.body.productId;
     const img = 'http://localhost:3000/uploads/' + req.file.filename;
-    console.log(productId === undefined);
-    if(productId === 'undefined') {
+    console.log(req.body);
+    console.log(productId === '');
+    if(productId === '') {
         const newProduct = new Product({
             name: name, price: price, cate: cate, des: des, quantity: quantity, img: img
         })
@@ -132,3 +134,36 @@ module.exports.removeCate = (req, res, next) => {
         }        
     })   
 }
+
+module.exports.getContact = (req, res, next) => {
+    return Contact.find({}, (err, doc) => {
+        if(err) return res.status(500).json({err: err});
+        return res.status(200).json({contacts: doc});
+    })
+}
+
+module.exports.deleteContact = (req, res, next) => {
+    const id = req.params.id;
+    return Contact.findByIdAndDelete(id, (err, doc) => {
+        if(err) return res.status(500).json({err: err});
+        return res.status(200).json({contact: doc});
+    })
+}
+
+module.exports.searchContact = (req, res, next) => {
+    var q = req.query.q;
+    console.log(q)
+    
+    const regex = new RegExp(escapeRegex(q), 'gi');
+
+    Contact.find({subject : regex},(err, doc) => {
+        if(err) {
+            return res.status(500).json({err : err});
+        }
+        return res.status(200).json({contacts : doc});
+    })
+}
+
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
